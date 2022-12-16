@@ -18,10 +18,10 @@ Pull data with `python ingestflow.py`
 
 # Training
 
-A messy training script is `train_reg.py`. This also was used to generate the figures below.
+A messy training script is `train.py`. This also was used to generate the figures below.
 
 # Results
 
-![](test_predictions.png)
+![](figures/test_predictions.png)
 
-![](true_v_predicted.png)
+![](figures/true_v_predicted.png)
