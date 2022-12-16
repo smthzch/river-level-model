@@ -115,7 +115,7 @@ plt.scatter(y, y_hat, s=10, alpha=0.5)
 plt.title("Test Set Comparison")
 plt.xlabel("True Level")
 plt.ylabel("Predicted Level")
-plt.savefig("true_v_predicted.png")
+plt.savefig("true_v_predicted.png", facecolor="white")
 
 # %%
 resid = np.array(y_hat) - np.array(y)
@@ -139,6 +139,6 @@ for i, ix in enumerate([minix, maxix]):
 
 f.suptitle("Test Set Predictions (Min/Max)")
 plt.subplots_adjust(top=0.85)
-f.savefig("test_predictions.png")
+f.savefig("test_predictions.png", facecolor="white")
 
 # %%
