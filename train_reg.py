@@ -67,7 +67,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 losses = []
 
 #%%
-nstep = 1
+nstep = 30
 model.train()
 epochs = nstep
 for i in range(epochs):
@@ -115,7 +115,7 @@ plt.scatter(y, y_hat, s=10, alpha=0.5)
 plt.title("Test Set Comparison")
 plt.xlabel("True Level")
 plt.ylabel("Predicted Level")
-plt.savefig("true_v_predicted.png", facecolor="white")
+plt.savefig("true_v_predicted.png", facecolor="white", transparent=False)
 
 # %%
 resid = np.array(y_hat) - np.array(y)
@@ -139,6 +139,6 @@ for i, ix in enumerate([minix, maxix]):
 
 f.suptitle("Test Set Predictions (Min/Max)")
 plt.subplots_adjust(top=0.85)
-f.savefig("test_predictions.png", facecolor="white")
+f.savefig("test_predictions.png", facecolor="white", transparent=False)
 
 # %%
