@@ -74,7 +74,12 @@ for i in range(epochs):
     losses += [train(i, model, optimizer, dataloader, plot=False)]
 
 #%%
-torch.save(model.state_dict(), 'params/model.pt')
+model_path = 'params/model.pt'
+torch.save(model.state_dict(), model_path)
+
+#%%
+model.load_state_dict(torch.load('params/model.pt'))
+model.eval()
 
 #%%
 plt.plot(losses)
@@ -105,9 +110,12 @@ for i, sample in enumerate(testloader):
     y += dataset.stage(sample['data'].detach().numpy()[:,0]).tolist()
     y_hat += dataset.stage(model(sample['image'].to(device)).detach().cpu().numpy().flatten()).tolist()
 
-
+#%%
 plt.scatter(y, y_hat, s=10, alpha=0.5)
-
+plt.title("Test Set Comparison")
+plt.xlabel("True Level")
+plt.ylabel("Predicted Level")
+plt.savefig("true_v_predicted.png")
 
 # %%
 resid = np.array(y_hat) - np.array(y)
@@ -115,4 +123,22 @@ resid = np.array(y_hat) - np.array(y)
 plt.scatter(x=y, y=resid)
 # %%
 np.abs(resid).mean()
+# %%
+minix, maxix = np.argmin(y_hat), np.argmax(y_hat)
+
+f, ax = plt.subplots(2,1)
+f.tight_layout(h_pad=2)
+
+for i, ix in enumerate([minix, maxix]):
+    dat = testset[ix]
+    img = dat["image"].detach().numpy().transpose(1,2,0)
+    stage = y[ix]
+    predicted = y_hat[ix]
+    ax[i].imshow(img)
+    ax[i].set_title(f'Stage: {round(stage, 2)}, Pred: {round(predicted, 2)}')
+
+f.suptitle("Test Set Predictions (Min/Max)")
+plt.subplots_adjust(top=0.85)
+f.savefig("test_predictions.png")
+
 # %%
