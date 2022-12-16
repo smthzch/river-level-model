@@ -1,0 +1,5 @@
+.metaflow/
+__pycache__/
+data/
+params/
+scratch/
