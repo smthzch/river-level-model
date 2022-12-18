@@ -10,9 +10,13 @@ TODO
 
 # Ingest Data
 
-Data is pulled from USGS webcams. The current hardcoded site location seems to be down now.
+Data is pulled from USGS webcams and the service seems to be down often.
 
 Pull data with `python ingestflow.py run`
+
+Each time this is run a single new image will be pulled and new stage data will be pulled for images if it is available.
+
+I set up a cron job to run this every hour, it takes a while to build up a dataset worth anything.
 
 # Training
 
