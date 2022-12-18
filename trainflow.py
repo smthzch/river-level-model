@@ -22,10 +22,10 @@ class TrainFlow(FlowSpec):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    learning_rate = Parameter("learning_rate", default=1e-4)
+    learning_rate = Parameter("learning-rate", default=1e-4)
     epochs = Parameter("epochs", default=30)
     run_path = Parameter(
-        "run_path",
+        "run-path",
         help="Location to save model and plot outputs.",
         default=f'runs/run_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
     )
@@ -39,13 +39,22 @@ class TrainFlow(FlowSpec):
         if not os.path.exists(self.run_path):
             os.makedirs(Path(self.run_path, "plots"))
 
+        # log parameters
+        pd.DataFrame({
+            "name": ["learning_rate", "epochs", "smoketest"],
+            "value": [self.learning_rate, self.epochs, self.smoketest]
+        }).to_csv(Path(self.run_path, "parameters.csv"), index=False)
+
         # load dataset
         self.transform = transforms.Compose([Rescale(12), ToTensor()])
         self.dataset = RiverDataset("data/data.db", "data/imgs", self.transform, split='train')
+
+        self.testset = RiverDataset("data/data.db", "data/imgs", self.transform, split='test')
+        self.testloader = DataLoader(self.testset, 64, False, num_workers=8)
         
         if self.smoketest:
             self.dataset.data = self.dataset.data.iloc[0:8]
-            self.run_epochs = 1
+            self.run_epochs = 2
         else:
             self.run_epochs = self.epochs
         
@@ -68,7 +77,7 @@ class TrainFlow(FlowSpec):
         )
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
 
-        self.model.fit(self.dataloader, optimizer, self.run_epochs)
+        self.model.fit(self.dataloader, self.testloader, optimizer, self.run_epochs)
 
         self.next(self.save)
 
@@ -77,27 +86,24 @@ class TrainFlow(FlowSpec):
         torch.save(self.model.state_dict(), Path(self.run_path, "model.pt"))
 
         plt.plot(self.model.losses)
+        plt.plot(self.model.val_losses)
         plt.savefig(Path(self.run_path, "plots/losses.png"))
 
         self.next(self.validate)
 
     @step
     def validate(self):
-        testset = RiverDataset("data/data.db", "data/imgs", self.transform, split='test')
-        testloader = DataLoader(testset, 64, False, num_workers=8)
-
-        preds = self.model.predict(testloader)
+        preds = self.model.predict(self.testloader)
 
         # metrics
-        metrics_df = pd.DataFrame({
+        pd.DataFrame({
             "metric": ["mse", "mae", "r2"],
             "value": [
                 mean_squared_error(preds.y, preds.y_hat), 
                 mean_absolute_error(preds.y, preds.y_hat), 
                 r2_score(preds.y, preds.y_hat)
             ]
-        })
-        metrics_df.to_csv(Path(self.run_path, "metrics.csv"), index=False)
+        }).to_csv(Path(self.run_path, "metrics.csv"), index=False)
 
         # true vs pred plot
         plt.scatter(preds.y, preds.y_hat, s=10, alpha=0.5)
@@ -113,7 +119,7 @@ class TrainFlow(FlowSpec):
         f.tight_layout(h_pad=2)
 
         for i, ix in enumerate([minix, maxix]):
-            dat = testset[ix]
+            dat = self.testset[ix]
             img = dat["image"].numpy().transpose(1,2,0)
             stage = preds.y[ix]
             predicted = preds.y_hat[ix]

@@ -31,16 +31,19 @@ class StageModel(nn.Module):
         h1 = self.relu(self.fc1(c3.view(-1, self.denseSize)))
         return self.fc2(h1)
 
-    def fit(self, dataloader, optim, epochs):
+    def fit(self, dataloader, testloader, optim, epochs):
         # save normalizing constants for predicting new data
         self.mus = dataloader.dataset.mus
         self.sds = dataloader.dataset.sds
 
         self.train()
         self.losses = []
+        self.val_losses = []
         for epoch in range(epochs):
             train_loss = 0.0
+            val_loss = 0.0
             n = 0.0
+            # train
             for data in dataloader:
                 imgs = data['image'].to(self.device)
                 y = data['data'][:,0][:,None].to(self.device)
@@ -51,9 +54,22 @@ class StageModel(nn.Module):
                 train_loss += loss.item()
                 n += 1
                 optim.step()
-
             self.losses += [train_loss / n]
-            print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / n ))
+
+            # val
+            n = 0.0
+            with torch.no_grad():
+                for data in testloader:
+                    imgs = data['image'].to(self.device)
+                    y = data['data'][:,0][:,None].to(self.device)
+                    optim.zero_grad()
+                    y_hat = self.forward(imgs)
+                    loss = (y_hat - y).pow(2).mean()
+                    val_loss += loss.item()
+                    n += 1
+            self.val_losses += [val_loss / n]
+            
+            print('====> Epoch: {} train loss: {:.4f}, val loss {:.4f}'.format(epoch, self.losses[-1], self.val_losses[-1] ))
 
     def predict(self, dataloader):
         self.eval() 
