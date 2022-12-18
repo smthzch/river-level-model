@@ -2,9 +2,7 @@
 
 This project provides the utilities to fetch USGS river camera imagery and build a Convolutional Neural Network to predict river level based on imagery.
 
-Ingest is performed by a `Metaflow` flow.
-
-Training uses Pytorch.
+Both ingest and training are managed by a `Metaflow`.
 
 # Setup
 
@@ -14,11 +12,16 @@ TODO
 
 Data is pulled from USGS webcams. The current hardcoded site location seems to be down now.
 
-Pull data with `python ingestflow.py`
+Pull data with `python ingestflow.py run`
 
 # Training
 
-A messy training script is `train.py`. This also was used to generate the figures below.
+Training is performed by calling `python trainflow.py run`
+
+Call `python trainflow.py run --help` to view available command line parameters.
+
+By default the model, metrics, and validation plots are saved to the `runs/run_{datetime.now()}` directory.
+This directory is created if it does not exist.
 
 # Results
 
