@@ -26,9 +26,3 @@ Call `python trainflow.py run --help` to view available command line parameters.
 
 By default the model, metrics, and validation plots are saved to the `runs/run_{datetime.now()}` directory.
 This directory is created if it does not exist.
-
-# Results
-
-![](figures/test_predictions.png)
-
-![](figures/true_v_predicted.png)
