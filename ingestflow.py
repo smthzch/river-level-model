@@ -1,7 +1,7 @@
 from metaflow import FlowSpec, step, catch
 from riverlevelcam import ingest
 
-class DataFlow(FlowSpec):
+class IngestFlow(FlowSpec):
     """A flow to retrieve river camera imagery and associated stage/discharge measurements.
 
     The flow start with getting stage data for images that already exist and storing it within the DB
@@ -49,4 +49,4 @@ class DataFlow(FlowSpec):
         print("Done.")
 
 if __name__ == "__main__":
-    DataFlow()
+    IngestFlow()
